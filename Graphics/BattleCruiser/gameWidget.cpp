@@ -11,12 +11,19 @@ GameWidget::GameWidget(QWidget *parent) :
 
     connect(&gameTimer, SIGNAL(timeout()), this, SLOT(gameTimerEvent()));
     connect(&visualTimer, SIGNAL(timeout()), this, SLOT(visualTimerEvent()));
+    connect(&infinityClouds, SIGNAL(timeout()), this, SLOT(cloudsTimerEvent()));
 
     startGameSession();
 }
 
 GameWidget::~GameWidget()
 {
+    foreach (QGraphicsPixmapItem *item, cloudList)
+    {
+        scene->removeItem(item);
+        delete item;
+    }
+
     delete missile;
     delete enemy;
     delete catapult;
@@ -53,6 +60,28 @@ void GameWidget::initGraphicsOutput()
 
     missile = new StoneMissile;
     enemy = new EnemyFace;
+
+    createClouds();
+}
+
+void GameWidget::createClouds()
+{
+    const int cloudsCount = 5;
+    QImage stdCloud("cloud.png");
+
+
+    for (int i = 0; i < cloudsCount; i++)
+    {
+        cloudList << new QGraphicsPixmapItem(QPixmap::fromImage(stdCloud.scaled(QSize(100, 50))));
+    }
+
+    foreach (QGraphicsPixmapItem *item, cloudList)
+    {
+        scene->addItem(item);
+        qreal xPos = (rand() % int(scene->width())) + scene->sceneRect().left();
+        qreal yPos = (rand() % int(scene->height() / 3)) + scene->sceneRect().top();
+        item->setPos(xPos, yPos);
+    }
 }
 
 void GameWidget::startGameSession()
@@ -69,6 +98,7 @@ void GameWidget::startGameSession()
     startNewRound();
 
     gameTimer.start(999);
+    infinityClouds.start(fps);
 }
 
 void GameWidget::startNewRound()
@@ -205,6 +235,20 @@ void GameWidget::setNextEmemyPos()
     enemy->setPos(newPos);
 }
 
+void GameWidget::setNextCloudsPos()
+{
+    const qreal windSpeed = 2;
+    foreach (QGraphicsPixmapItem *item, cloudList)
+    {
+        item->setPos(item->pos().x() + windSpeed, item->pos().y());
+        if (item->pos().x() > scene->sceneRect().right() + item->boundingRect().width())
+        {
+            qreal yPos =(rand() % int(scene->height() / 3)) + scene->sceneRect().top();
+            item->setPos(scene->sceneRect().left() - item->boundingRect().width(), yPos);
+        }
+    }
+}
+
 
 void GameWidget::visualTimerEvent()
 {
@@ -213,6 +257,11 @@ void GameWidget::visualTimerEvent()
 
     setNextEmemyPos();
     setNextMissilePos();
+}
+
+void GameWidget::cloudsTimerEvent()
+{
+    setNextCloudsPos();
 }
 
 void GameWidget::gameTimerEvent()
@@ -253,7 +302,7 @@ void GameWidget::drawBackground(QPainter *painter, const QRectF &rect)
     QPointF leftBeach = QPointF(scene->sceneRect().left(), catapultPosition.y());
     QRectF waterField = QRectF(leftBeach, sceneRect.bottomRight());
     QLinearGradient waterGradient(waterField.topLeft(), waterField.bottomRight());
-    waterGradient.setColorAt(0, Qt::white);
+    waterGradient.setColorAt(0, Qt::lightGray);
     waterGradient.setColorAt(1, Qt::darkBlue);
     painter->fillRect(rect.intersect(waterField), waterGradient);
     painter->drawRect(waterField);
