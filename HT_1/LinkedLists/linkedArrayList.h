@@ -18,7 +18,6 @@ public:
     virtual bool isExists(int target) const;
 
 protected:
-    int findItemIndex(const int value) const;
     void checkOverflow();
 
 private:

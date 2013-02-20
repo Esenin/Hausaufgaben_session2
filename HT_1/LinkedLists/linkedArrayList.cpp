@@ -17,47 +17,8 @@ LinkedArrayList::~LinkedArrayList()
 
 void LinkedArrayList::add(int newValue)
 {
-    if (isEmpty())
-    {
-        array[elementsCount++] = newValue;
-        return;
-    }
-
-    int newIndex = findItemIndex(newValue);
-    if (array[newIndex] == newValue)
-        return;
-
-    for (int i = elementsCount; i > newIndex; i--)
-    {
-        array[i] = array[i - 1];
-    }
-
-    array[newIndex + (array[newIndex] < newValue)? 1 : 0] = newValue;
-    elementsCount++;
+    array[elementsCount++] = newValue;
     checkOverflow();
-}
-
-int LinkedArrayList::findItemIndex(const int value) const
-{
-    int left = 0;
-    int right = elementsCount - 1;
-    int pivotIndex = 0;
-    while (right > left)
-    {
-        pivotIndex = (right + left) / 2;
-
-        if (array[pivotIndex] > value)
-            right = pivotIndex;
-        else
-        {
-            if (array[pivotIndex] < value)
-                left = pivotIndex;
-            else
-                break;
-        }
-    }
-
-    return pivotIndex;
 }
 
 void LinkedArrayList::checkOverflow()
@@ -79,14 +40,15 @@ void LinkedArrayList::checkOverflow()
 
 void LinkedArrayList::remove(int target)
 {
-    int index = findItemIndex(target);
-    if (array[index] != target)
-        return;
-
-    for (int i = index; i < elementsCount; i++)
-        array[i] = array[i + 1];
-
-    elementsCount--;
+    for (int i = elementsCount - 1; i >= 0; i--)
+    {
+        if (array[i] == target)
+        {
+            for (int shift = i; shift < elementsCount - 1; shift++)
+                array[shift] = array[shift + 1];
+            elementsCount--;
+        }
+    }
 }
 
 void LinkedArrayList::writeAll() const
@@ -99,6 +61,8 @@ void LinkedArrayList::writeAll() const
 
 bool LinkedArrayList::isExists(int target) const
 {
-    int index = findItemIndex(target);
-    return (array[index] == target);
+    for (int i = 0; i < elementsCount; i++)
+        if (array[i] == target)
+            return true;
+    return false;
 }

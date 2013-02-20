@@ -4,23 +4,27 @@
 
 using namespace std;
 
+void addSomeTestNumbers(List *testList)
+{
+    testList->add(13);
+    testList->add(5);
+    testList->add(7);
+    testList->add(3);
+    testList->add(17);
+    testList->add(14);
+}
+
 void testing(List *arrList, List *pointerList)
 {
-    arrList->add(5);
-    pointerList->add(5);
-
-    arrList->add(7);
-    pointerList->add(7);
-
-    arrList->add(3);
-    pointerList->add(3);
+    addSomeTestNumbers(arrList);
+    addSomeTestNumbers(pointerList);
 
     cout << "Array list contains:\n";
     arrList->writeAll();
     cout << "PointerList contains:\n";
     pointerList->writeAll();
 
-    cout << "Deleting '5'";
+    cout << "Deleting '5'\n";
 
     arrList->remove(5);
     pointerList->remove(5);
@@ -29,6 +33,8 @@ void testing(List *arrList, List *pointerList)
     arrList->writeAll();
     cout << "PointerList contains:\n";
     pointerList->writeAll();
+
+    cout << "done\n";
 }
 
 
