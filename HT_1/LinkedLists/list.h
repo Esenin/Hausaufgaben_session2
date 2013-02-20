@@ -11,6 +11,7 @@ public:
     virtual void remove(int target) = 0;
     virtual bool isExists(int target) const = 0;
     virtual void writeAll() const = 0;
+    virtual int &operator[] (int index) = 0;
 
     bool isEmpty() const;
 

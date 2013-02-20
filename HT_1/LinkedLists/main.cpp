@@ -1,5 +1,5 @@
 #include <iostream>
-#include "linkedArrayList.h"
+#include "sortedArrayList.h"
 #include "linkedList.h"
 
 using namespace std;
@@ -34,13 +34,16 @@ void testing(List *arrList, List *pointerList)
     cout << "PointerList contains:\n";
     pointerList->writeAll();
 
+    cout << "Getting third element:\n";
+    cout << "ArrayList: " << (*arrList)[2] << "\n";
+    cout << "LinkedList: " << (*pointerList)[2] << "\n";
+
     cout << "done\n";
 }
 
-
 int main()
 {
-    List *arrayList = new LinkedArrayList;
+    List *arrayList = new SortedArrayList;
     List *linkedList = new LinkedList;
 
     testing(arrayList, linkedList);

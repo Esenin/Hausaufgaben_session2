@@ -1,4 +1,4 @@
-#include "linkedlist.h"
+#include "linkedList.h"
 
 struct LinkedList::ListElement
 {
@@ -17,7 +17,9 @@ struct LinkedList::ListElement
 LinkedList::LinkedList() :
     List(),
     head(NULL),
-    tail(NULL)
+    tail(NULL),
+    currPointer(NULL),
+    currPointerPosition(0)
 {
 
 }
@@ -36,6 +38,30 @@ int LinkedList::getElementsCount()
     return elementsCount;
 }
 
+int& LinkedList::operator[](int index)
+{
+    if (index < 0)
+        return head->value;
+
+    if (index >= elementsCount)
+        return tail->value;
+
+    if (currPointerPosition > index)
+    {
+        currPointer = head;
+        currPointerPosition = 0;
+    }
+
+    while (currPointerPosition != index)
+    {
+        currPointer = currPointer->next;
+        currPointerPosition++;
+    }
+
+    return currPointer->value;
+}
+
+
 void LinkedList::add(const int newValue)
 {
     ListElement *newElement = new ListElement(newValue);
@@ -43,6 +69,7 @@ void LinkedList::add(const int newValue)
     if (isEmpty())
     {
         head = newElement;
+        currPointer = head;
         tail = head;
     }
     else
