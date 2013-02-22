@@ -48,6 +48,9 @@ int main()
 
     testing(arrayList, linkedList);
 
+    delete arrayList;
+    delete linkedList;
+
     return EXIT_SUCCESS;
 }
 
