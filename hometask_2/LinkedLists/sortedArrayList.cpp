@@ -12,7 +12,7 @@ SortedArrayList::~SortedArrayList()
 {
     currentSize = 0;
     elementsCount = 0;
-    delete array;
+    delete[] array;
 }
 
 int &SortedArrayList::operator[](int index)

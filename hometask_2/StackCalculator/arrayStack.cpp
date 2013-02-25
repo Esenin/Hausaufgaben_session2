@@ -11,7 +11,7 @@ ArrayStack::ArrayStack() :
 ArrayStack::~ArrayStack()
 {
     clear();
-    delete array;
+    delete[] array;
 }
 
 void ArrayStack::clear()
