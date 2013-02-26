@@ -21,10 +21,13 @@ public slots:
     void startJob();
     void stopJob();
     void clear();
+    void zoomIn();
+    void zoomOut();
 
 protected:
     void drawNextFrame();
     void drawBackground(QPainter *painter, const QRectF &rect);
+    void mouseReleaseEvent(QMouseEvent *event);
 
     void initGraphicsOutput();
     qreal pointToAbstractValue(qreal yValue, qreal minValue, qreal maxValue);
@@ -39,6 +42,8 @@ private:
 
     const int fpsDelay;
     const int stepSize;
+    const int zoomRate;
+    bool isZoomed;
     qreal maxLimit;
     qreal minLimit;
     qreal graphHeight;

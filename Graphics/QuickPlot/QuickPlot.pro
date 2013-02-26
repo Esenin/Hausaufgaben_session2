@@ -20,3 +20,10 @@ HEADERS  += realTimePlot.h \
     keyPoint.h
 
 FORMS    += realTimePlot.ui
+
+OTHER_FILES += \
+    reset_btn.png \
+    start_btn.png \
+    stop_btn.png \
+    zoomIn_btn.png \
+    zoomOut_btn.png

@@ -4,6 +4,8 @@ SensorGraph::SensorGraph(QWidget *parent) :
     QGraphicsView(parent),
     fpsDelay(50),
     stepSize(2),
+    zoomRate(2),
+    isZoomed(false),
     maxLimit(1),
     minLimit(0),
     nextToDraw(QPointF(0, -80))
@@ -63,8 +65,18 @@ void SensorGraph::clear()
     pointsQueue.clear();
     minLimit = 0;
     maxLimit = 1;
-    nextToDraw = QPointF(0, -80);
+    //nextToDraw = QPointF(0, -80);
 
+    foreach (QGraphicsItem *item, scene->items())
+    {
+        QGraphicsLineItem *curLine = qgraphicsitem_cast<QGraphicsLineItem *>(item);
+        if (curLine == NULL)
+            continue;
+        scene->removeItem(curLine);
+    }
+
+
+    matrix().reset();
 }
 
 qreal SensorGraph::abstractValueToPoint(qreal value)
@@ -180,4 +192,27 @@ void SensorGraph::drawBackground(QPainter *painter, const QRectF &rect)
     painter->drawText(textRect.translated(2, scene->sceneRect().height() - 20), minDisplay);
     painter->setPen(Qt::black);
     //painter->drawText(textRect, maxDisplay);
+}
+
+void SensorGraph::mouseReleaseEvent(QMouseEvent *event)
+{
+    if (isZoomed)
+        zoomOut();
+    else
+        zoomIn();
+    isZoomed = !isZoomed;
+}
+
+void SensorGraph::zoomIn()
+{
+    QMatrix outputMatrix = matrix();
+    outputMatrix.scale(zoomRate, zoomRate);
+    setMatrix(outputMatrix);
+}
+
+void SensorGraph::zoomOut()
+{
+    QMatrix outputMatrix = matrix();
+    outputMatrix.scale(1 / qreal(zoomRate), 1 / qreal(zoomRate));
+    setMatrix(outputMatrix);
 }
