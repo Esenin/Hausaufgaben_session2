@@ -1,5 +1,7 @@
 #include "writer.h"
 
+using namespace writerNamespace;
+
 enum Directions
 {
     left = 1,
@@ -7,8 +9,6 @@ enum Directions
     right,
     down
 };
-
-
 
 Writer::Writer(int *array[], int size)
 {

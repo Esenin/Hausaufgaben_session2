@@ -7,11 +7,10 @@
 /*!
   You can find output in "out.txt"
 */
-class FileWriter : public Writer
+class FileWriter : public writerNamespace::Writer
 {
 public:
     FileWriter(int *array[], int size);
-    virtual ~FileWriter();
     void print(int *array[], Point current, Point next);
 };
 

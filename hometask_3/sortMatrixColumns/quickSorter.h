@@ -20,5 +20,3 @@ protected:
     */
     void qSort(int *array[], int first, int last);
 };
-
-

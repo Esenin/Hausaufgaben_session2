@@ -7,11 +7,6 @@ FileWriter::FileWriter(int *array[], int size) :
 {
 }
 
-FileWriter::~FileWriter()
-{
-    // do nothing
-}
-
 void FileWriter::print(int *array[], Point current, Point next)
 {
     ofstream file;

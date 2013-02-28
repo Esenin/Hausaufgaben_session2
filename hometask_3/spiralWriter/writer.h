@@ -1,6 +1,7 @@
 #pragma once
 
-//! To not create separate file for this constant
+namespace writerNamespace
+{
 int const arrMaxSize = 100;
 
 //! Interface class
@@ -48,4 +49,5 @@ protected:
     int **insideArray;
     int arrSize;
 };
+}
 

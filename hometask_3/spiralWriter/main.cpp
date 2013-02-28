@@ -8,6 +8,7 @@
 #include "fileWriter.h"
 
 using namespace std;
+using namespace writerNamespace;
 
 bool canDivByTwo(int x)
 {
