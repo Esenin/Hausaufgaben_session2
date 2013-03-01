@@ -1,5 +1,4 @@
-#ifndef KEYPOINT_H
-#define KEYPOINT_H
+#pragma once
 
 #include <QGraphicsItem>
 #include <QPainter>
@@ -8,14 +7,13 @@
 class KeyPoint : public QGraphicsItem
 {
 public:
-    KeyPoint();
+	KeyPoint();
 
-    QRectF boundingRect() const;
-    void paint(QPainter *painter,
-               const QStyleOptionGraphicsItem *option, QWidget *widget);
+	QRectF boundingRect() const;
+	void paint(QPainter *painter, const QStyleOptionGraphicsItem *option
+		, QWidget *widget);
 
 private:
-    QRectF visualArea;
+	QRectF mVisualArea;
 };
 
-#endif // KEYPOINT_H

@@ -1,218 +1,226 @@
 #include "sensorGraph.h"
 
 SensorGraph::SensorGraph(QWidget *parent) :
-    QGraphicsView(parent),
-    fpsDelay(50),
-    stepSize(2),
-    zoomRate(2),
-    isZoomed(false),
-    maxLimit(1),
-    minLimit(0),
-    nextToDraw(QPointF(0, -80))
+	QGraphicsView(parent)
+	, mPenBrush(QBrush(Qt::yellow))
+	, fpsDelay(50)
+	, autoScaleInterval(4000)
+	, updateOutputInterval(1000)
+	, stepSize(2)
+	, zoomRate(2)
+	, mIsZoomed(false)
+	, mScaleCoefficient(0)
+	, mAutoScaleTimer(0)
+	, mUpdateCurrValueTimer(0)
+	, mOutputValue(0)
 {
-    debugValue = 50;
+	initGraphicsOutput();
 
-    initGraphicsOutput();
-
-    connect(&visualTimer, SIGNAL(timeout()), this, SLOT(visualTimerEvent()));
+	connect(&visualTimer, SIGNAL(timeout()), this, SLOT(visualTimerEvent()));
 }
 
 SensorGraph::~SensorGraph()
 {
-    scene->removeItem(mainPoint);
-    delete mainPoint;
-    delete scene;
+	scene->removeItem(mainPoint);
+	delete pointsDataProcessor;
+	delete mainPoint;
+	delete scene;
 }
 
 void SensorGraph::initGraphicsOutput()
 {
-    scene = new QGraphicsScene(this);
-    scene->setItemIndexMethod(QGraphicsScene::NoIndex);
-    scene->setSceneRect(-200, -160, 220, 160);
+	scene = new QGraphicsScene(this);
+	scene->setItemIndexMethod(QGraphicsScene::NoIndex);
+	scene->setSceneRect(-200, -160, 205, 160);
 
-    setScene(scene);
-    setRenderHint(QPainter::Antialiasing, false);
+	setScene(scene);
+	setRenderHint(QPainter::Antialiasing, false);
 
-    /// This makes information on left side actual
-    setViewportUpdateMode(QGraphicsView::FullViewportUpdate);
+	/// This makes information on left side actual
+	setViewportUpdateMode(QGraphicsView::FullViewportUpdate);
 
-    setTransformationAnchor(QGraphicsView::AnchorUnderMouse);
-    setCacheMode(CacheNone);
-    setRenderHint(QPainter::Antialiasing);
-    setMinimumSize(220, 160);
+	setTransformationAnchor(QGraphicsView::AnchorUnderMouse);
+	setCacheMode(CacheNone);
+	setRenderHint(QPainter::Antialiasing);
+	setMinimumSize(205, 160);
+	setVerticalScrollBarPolicy(Qt::ScrollBarAlwaysOff);
+	setHorizontalScrollBarPolicy(Qt::ScrollBarAlwaysOff);
 
 
-    mainPoint = new KeyPoint;
-    scene->addItem(mainPoint);
-    mainPoint->setPos(nextToDraw);
+	mainPoint = new KeyPoint;
+	scene->addItem(mainPoint);
 
-    graphHeight = scene->sceneRect().height() - 20;
+	pointsDataProcessor = new PointsQueueProcessor(scene->sceneRect().height() - 20, scene->sceneRect().left());
 }
 
 
 void SensorGraph::startJob()
 {
-    visualTimer.start(fpsDelay);
+	visualTimer.start(fpsDelay);
 }
 
 void SensorGraph::stopJob()
 {
-    visualTimer.stop();
+	visualTimer.stop();
 }
 
 void SensorGraph::clear()
 {
-    pointsQueue.clear();
-    minLimit = 0;
-    maxLimit = 1;
-    //nextToDraw = QPointF(0, -80);
 
-    foreach (QGraphicsItem *item, scene->items())
-    {
-        QGraphicsLineItem *curLine = qgraphicsitem_cast<QGraphicsLineItem *>(item);
-        if (curLine == NULL)
-            continue;
-        scene->removeItem(curLine);
-    }
+	pointsDataProcessor->clearData();
 
+	foreach (QGraphicsItem *item, scene->items()) {
+		QGraphicsLineItem *curLine = qgraphicsitem_cast<QGraphicsLineItem *>(item);
+		if (curLine == NULL) {
+			continue;
+		}
+		scene->removeItem(curLine);
+	}
 
-    matrix().reset();
+	//! why matrix().reset() doesnt work ?
+	QMatrix defaultMatrix ;
+	setMatrix(defaultMatrix);
+
+	mIsZoomed = false;
 }
 
-qreal SensorGraph::abstractValueToPoint(qreal value)
-{
-    return ((value - minLimit) / (maxLimit - minLimit) * graphHeight + 10) * (-1);
-}
 
-qreal SensorGraph::pointToAbstractValue(qreal yValue, qreal minValue, qreal maxValue)
-{
-    return (((maxValue - minValue) * (-yValue - 10)) / graphHeight) + minValue;
-}
 
 void SensorGraph::setNextValue(qreal newValue)
 {
-    int oldMax = maxLimit;
-    int oldMin = minLimit;
-    if (newValue > maxLimit)
-        maxLimit = newValue;
-    if (newValue < minLimit)
-        minLimit = newValue;
-    update();
-
-    if (oldMax != maxLimit || oldMin != minLimit)
-    {
-        graphAutoScaling(oldMin, oldMax);
-    }
-
-    nextToDraw.setY(abstractValueToPoint(newValue));
+	pointsDataProcessor->addNewValue(newValue);
 }
 
-void SensorGraph::graphAutoScaling(qreal oldMin, qreal oldMax)
-{
-    qreal currentValue;
-    for (int i = 0; i < pointsQueue.size(); i++)
-    {
-        currentValue = pointToAbstractValue(pointsQueue[i].y(), oldMin, oldMax);
-        pointsQueue[i].setY(abstractValueToPoint(currentValue));
-    }
-}
 
 void SensorGraph::drawNextFrame()
 {
-    pointsQueue.append(QPointF(mainPoint->pos().x() - stepSize, mainPoint->pos().y()));
-    mainPoint->setPos(nextToDraw);
-    pointsQueue.append(nextToDraw);
+	mainPoint->setPos(pointsDataProcessor->latestPosition());
 
-    /// shifting lines left
-    foreach (QGraphicsItem *item, scene->items())
-    {
-        QGraphicsLineItem *curLine = qgraphicsitem_cast<QGraphicsLineItem *>(item);
-        if (curLine == NULL)
-            continue;
+	//! shifting lines left
+	pointsDataProcessor->makeShiftLeft(stepSize);
 
-        curLine->setPos(curLine->pos().x() - stepSize, curLine->pos().y());
-        if (curLine->x() < scene->sceneRect().left() - stepSize)
-            scene->removeItem(curLine);
-    }
+	foreach (QGraphicsItem *item, scene->items()) {
+		QGraphicsLineItem *curLine = qgraphicsitem_cast<QGraphicsLineItem *>(item);
+		if (curLine == NULL) {
+			continue;
+		}
+        delete curLine;
+	}
 
-    QPen regularPen = QPen(QBrush(Qt::yellow), 2,
-                           Qt::SolidLine, Qt::RoundCap, Qt::RoundJoin);
-    QLineF quantOfGraph;
-    for (int i = 0; i < pointsQueue.size() - 1; i++)
-    {
-        quantOfGraph = QLineF(pointsQueue[i], pointsQueue[i + 1]);
-        scene->addLine(quantOfGraph, regularPen);
-    }
-    pointsQueue.clear();
-
+	QPen regularPen = QPen(mPenBrush, 2, Qt::SolidLine, Qt::RoundCap, Qt::RoundJoin);
+	QLineF quantOfGraph;
+	for (int i = 0; i < pointsDataProcessor->pointsBase()->size() - 1; i++) {
+		quantOfGraph = QLineF(pointsDataProcessor->pointsBase()->at(i)
+		, pointsDataProcessor->pointsBase()->at(i + 1));
+		scene->addLine(quantOfGraph, regularPen);
+	}
 }
 
 void SensorGraph::visualTimerEvent()
 {
-    drawNextFrame();
-
-
-    /// debug
-    if (rand() % 10 > 5)
-    {
-        debugValue += (rand() % 7) - 3;
-        if (debugValue < 5)
-            debugValue = 5;
-        if (debugValue > 95)
-            debugValue = 95;
-
-        setNextValue(debugValue);
-    }
+	drawNextFrame();
+	if (++mAutoScaleTimer * fpsDelay == autoScaleInterval) {
+		mAutoScaleTimer = 0;
+		pointsDataProcessor->checkPeaks();
+	}
+	if (++mUpdateCurrValueTimer * fpsDelay == updateOutputInterval) {
+		mUpdateCurrValueTimer = 0;
+		mOutputValue = pointsDataProcessor->latestValue();
+	}
 }
 
 void SensorGraph::drawBackground(QPainter *painter, const QRectF &rect)
 {
-    QRectF sceneRect = this->sceneRect();
+	QRectF sceneRect = this->sceneRect();
 
-    // Fill
-    QLinearGradient gradient(sceneRect.topLeft(), sceneRect.bottomRight());
-    gradient.setColorAt(0, Qt::darkGreen);
-    gradient.setColorAt(1, Qt::black);
-    painter->fillRect(scene->sceneRect(), gradient);
-    painter->setBrush(Qt::NoBrush);
-    painter->drawRect(scene->sceneRect());
+	//! Fill section
+	QLinearGradient gradient(sceneRect.bottomLeft(), sceneRect.topRight());
+	gradient.setColorAt(0, Qt::black);
+	gradient.setColorAt(1, Qt::darkGreen);
+	painter->fillRect(scene->sceneRect(), gradient);
+	painter->setBrush(Qt::NoBrush);
+	painter->setBrush(Qt::CrossPattern);
+	painter->drawRect(scene->sceneRect());
 
-    // Text
-    QRectF textRect(sceneRect.left() + 4, sceneRect.top() + 4,
-                    50, 50);
-    QString maxDisplay(QString::number(maxLimit));
-    QString minDisplay(QString::number(minLimit));
+	//! Text display section
+	QRectF textRect(sceneRect.left() + 4, sceneRect.top() + 4,
+					50, 50);
+	QString maxDisplay(QString::number(pointsDataProcessor->maxLimit()));
+	QString minDisplay(QString::number(pointsDataProcessor->minLimit()));
+	QString currentDisplay(QString::number(mOutputValue));
 
-    QFont font = painter->font();
-    font.setBold(true);
-    font.setPointSize(10);
-    painter->setFont(font);
-    painter->setPen(Qt::lightGray);
-    painter->drawText(textRect.translated(2, 2), maxDisplay);
-    painter->drawText(textRect.translated(2, scene->sceneRect().height() - 20), minDisplay);
-    painter->setPen(Qt::black);
-    //painter->drawText(textRect, maxDisplay);
+	QFont font = painter->font();
+	font.setBold(true);
+	font.setPointSize(10);
+	painter->setFont(font);
+	painter->setPen(Qt::lightGray);
+	painter->drawText(textRect.translated(2, 2), maxDisplay);
+	painter->drawText(textRect.translated(2, sceneRect.height() - 20), minDisplay);
+	painter->drawText(textRect.translated(sceneRect.width() - 30, sceneRect.height() - 20), currentDisplay);
+	painter->setPen(Qt::black);
+	Q_UNUSED(rect);
 }
 
 void SensorGraph::mouseReleaseEvent(QMouseEvent *event)
 {
-    if (isZoomed)
-        zoomOut();
-    else
-        zoomIn();
-    isZoomed = !isZoomed;
+	if (mIsZoomed) {
+		zoomOut();
+	} else {
+		zoomIn();
+	}
+	mIsZoomed = !mIsZoomed;
 }
 
 void SensorGraph::zoomIn()
 {
-    QMatrix outputMatrix = matrix();
-    outputMatrix.scale(zoomRate, zoomRate);
-    setMatrix(outputMatrix);
+	if (mScaleCoefficient > 5) {
+		return;
+	}
+	QMatrix outputMatrix = matrix();
+	outputMatrix.scale(zoomRate, zoomRate);
+	setMatrix(outputMatrix);
+	mScaleCoefficient++;
 }
 
 void SensorGraph::zoomOut()
 {
-    QMatrix outputMatrix = matrix();
-    outputMatrix.scale(1 / qreal(zoomRate), 1 / qreal(zoomRate));
-    setMatrix(outputMatrix);
+	if (mScaleCoefficient == 0) {
+		return;
+	}
+	QMatrix outputMatrix = matrix();
+	outputMatrix.scale(1 / qreal(zoomRate), 1 / qreal(zoomRate));
+	setMatrix(outputMatrix);
+	mScaleCoefficient--;
+}
+
+void SensorGraph::onSensorChange(const int newSensorIndex)
+{
+	clear();
+	switch(newSensorIndex)
+	{
+	case 3:
+	{
+		mPenBrush = QBrush(Qt::green);
+		break;
+	}
+	case 2:
+	{
+		mPenBrush = QBrush(Qt::red);
+		break;
+	}
+	case 1:
+	{
+		mPenBrush = QBrush(Qt::lightGray);
+		break;
+	}
+	case 0:
+	{
+		mPenBrush = QBrush(Qt::yellow);
+		break;
+	}
+	default:
+	{
+		mPenBrush = QBrush(Qt::yellow);
+	}
+	}
 }

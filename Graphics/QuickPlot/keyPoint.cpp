@@ -1,33 +1,32 @@
 #include "keyPoint.h"
 
 KeyPoint::KeyPoint() :
-    visualArea(QRectF(-10, -10, 10, 10))
+	mVisualArea(QRectF(-10, -10, 10, 10))
 {
-    setCacheMode(DeviceCoordinateCache);
-    setZValue(1000);
+	setCacheMode(DeviceCoordinateCache);
+	setZValue(1000);
 }
 
 
 
 QRectF KeyPoint::boundingRect() const
 {
-    return visualArea;
+	return mVisualArea;
 }
 
-void KeyPoint::paint(QPainter *painter,
-                     const QStyleOptionGraphicsItem *option, QWidget *widget)
+void KeyPoint::paint(QPainter *painter, const QStyleOptionGraphicsItem *option, QWidget *widget)
 {
-    painter->setPen(Qt::NoPen);
+	painter->setPen(Qt::NoPen);
 
-    QRadialGradient gradient(0, 0, 10);
+	QRadialGradient gradient(0, 0, 10);
 
-    gradient.setCenter(0, 0);
-    gradient.setFocalPoint(0, 0);
-    gradient.setColorAt(1, QColor(Qt::yellow).light(120));
-    gradient.setColorAt(0, QColor(Qt::darkYellow).light(120));
-    painter->setBrush(gradient);
+	gradient.setCenter(0, 0);
+	gradient.setFocalPoint(0, 0);
+	gradient.setColorAt(1, QColor(Qt::yellow).light(120));
+	gradient.setColorAt(0, QColor(Qt::darkYellow).light(120));
+	painter->setBrush(gradient);
 
-    painter->setPen(Qt::NoPen);
-    painter->drawEllipse(visualArea);
+	painter->setPen(Qt::NoPen);
+	painter->drawEllipse(mVisualArea);
 }
 

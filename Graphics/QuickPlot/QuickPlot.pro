@@ -13,11 +13,13 @@ TEMPLATE = app
 SOURCES += main.cpp\
         realTimePlot.cpp \
     sensorGraph.cpp \
-    keyPoint.cpp
+    keyPoint.cpp \
+    pointsQueueProcessor.cpp
 
 HEADERS  += realTimePlot.h \
     sensorGraph.h \
-    keyPoint.h
+    keyPoint.h \
+    pointsQueueProcessor.h
 
 FORMS    += realTimePlot.ui
 
