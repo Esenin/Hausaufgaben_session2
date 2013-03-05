@@ -1,5 +1,7 @@
 #include "calculator.h"
 
+using namespace Calculators;
+
 Calculator::Calculator() :
     leftArg(0),
     rightArg(0),

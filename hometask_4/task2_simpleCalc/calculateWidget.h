@@ -19,7 +19,7 @@ public slots:
     void changeParams();
 
 protected:
-    Calculator calcMachine;
+    Calculators::Calculator calcMachine;
 
     
 private:
