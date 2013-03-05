@@ -1,4 +1,4 @@
-#include "Widget.h"
+#include "widget.h"
 #include "ui_Widget.h"
 
 Widget::Widget(QWidget *parent) :

@@ -10,9 +10,11 @@ TARGET = task1
 TEMPLATE = app
 
 
-SOURCES += main.cpp\
-        Widget.cpp
+SOURCES += main.cpp \
+    widget.cpp
 
-HEADERS  += Widget.h
+HEADERS  += \
+    widget.h
 
-FORMS    += Widget.ui
+FORMS    += \
+    widget.ui
