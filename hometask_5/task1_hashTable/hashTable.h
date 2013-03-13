@@ -23,7 +23,7 @@ public:
     //! prints table size, number of elements, load-factor and most-loaded-cell
     void printStatistics() const;
 
-    bool isExists(QString const string);
+    bool exists(QString const string);
 
     //! @arg hashFunc function like   int foo(QString)
     void setHashFunc(Function hashFunc);

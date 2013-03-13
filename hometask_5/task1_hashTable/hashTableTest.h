@@ -20,30 +20,30 @@ private slots:
     void addToTable()
     {
         mTable->addValue(QString(42));
-        QVERIFY(mTable->isExists(QString(42)));
+        QVERIFY(mTable->exists(QString(42)));
     }
 
     void searchTableTest()
     {
-        QVERIFY(!mTable->isExists(QString(25)));
+        QVERIFY(!mTable->exists(QString(25)));
         mTable->addValue(QString(25));
-        QVERIFY(mTable->isExists(QString(25)));
+        QVERIFY(mTable->exists(QString(25)));
     }
 
     void removeTest()
     {
         mTable->removeValue(QString(42));
-        QVERIFY(!mTable->isExists(QString(42)));
+        QVERIFY(!mTable->exists(QString(42)));
         mTable->addValue(QString(2012));
         mTable->removeValue(QString(2012));
-        QVERIFY(!mTable->isExists(QString(2012)));
+        QVERIFY(!mTable->exists(QString(2012)));
     }
 
     void changeFunctionTest()
     {
         mTable->addValue(QString(21));
         mTable->setHashFunc(hashMixed);
-        QVERIFY(mTable->isExists(QString(21)));
+        QVERIFY(mTable->exists(QString(21)));
     }
 
     void cleanupTestCase()

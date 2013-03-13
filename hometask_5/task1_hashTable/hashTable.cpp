@@ -45,7 +45,7 @@ void HashTable::printStatistics() const
     printf("Most loaded cell is: %d, with %d elements\n\n", maxCollisIndex, maxCollisions);
 }
 
-bool HashTable::isExists(const QString string)
+bool HashTable::exists(const QString string)
 {
     return table[hash(string)].contains(string);
 }
