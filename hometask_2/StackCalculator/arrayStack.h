@@ -1,5 +1,4 @@
-#ifndef ARRAYSTACK_H
-#define ARRAYSTACK_H
+#pragma once
 
 #include "stack.h"
 #include "QString.h"
@@ -24,4 +23,3 @@ private:
     int currentStackSize;
 };
 
-#endif // ARRAYSTACK_H

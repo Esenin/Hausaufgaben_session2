@@ -59,8 +59,12 @@ QString LinkedStack::pop()
     tail = tail->prev;
     delete temp;
     elementsCount--;
+
     if (isEmpty())
         head = NULL;
+    else
+        tail->next = NULL;
+
     return result;
 }
 

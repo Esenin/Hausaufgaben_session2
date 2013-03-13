@@ -1,5 +1,4 @@
-#ifndef SENINSUPPORT_H
-#define SENINSUPPORT_H
+#pragma once
 
 #include <QString>
 
@@ -19,4 +18,3 @@ OperatorPriority getPriority(const QChar &x);
 bool isOperand(const QChar &x);
 bool isOperator(const QChar &x);
 
-#endif // SENINSUPPORT_H

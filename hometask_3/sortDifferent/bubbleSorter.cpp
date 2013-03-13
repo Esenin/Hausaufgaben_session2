@@ -3,7 +3,7 @@
 using std::swap;
 using std::cout;
 
-BubbleSorter::BubbleSorter(int array[], int size) :
+BubbleSorter::BubbleSorter(int *array, int const size) :
     Sorter(array, size)
 {
 }

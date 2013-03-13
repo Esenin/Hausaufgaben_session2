@@ -15,7 +15,6 @@ bool canDivByTwo(int x)
     return (x & 1) == 0;
 }
 
-//! really just print out your array to console
 void printArray(int *array[], int size)
 {
     for (int i = 0; i < size; i++)

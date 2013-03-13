@@ -32,12 +32,18 @@ void ArrayStack::push(const QString value)
 
 QString ArrayStack::pop()
 {
-    return array[--elementsCount];
+    if (elementsCount == 0)
+        return 0;
+    else
+        return array[--elementsCount];
 }
 
 QString ArrayStack::top()
 {
-    return QString(array[elementsCount - 1]);
+    if (elementsCount == 0)
+        return 0;
+    else
+        return QString(array[elementsCount - 1]);
 }
 
 void ArrayStack::increaseStackSize()

@@ -1,6 +1,8 @@
 #include <iostream>
+
 #include "sortedArrayList.h"
 #include "linkedList.h"
+#include "listTest.h"
 
 using namespace std;
 
@@ -43,6 +45,11 @@ void testing(List *arrList, List *pointerList)
 
 int main()
 {
+    cout << "Lists unit-test:\n\n";
+
+    ListTest test;
+    QTest::qExec(&test);
+
     List *arrayList = new SortedArrayList;
     List *linkedList = new LinkedList;
 

@@ -1,6 +1,6 @@
 TEMPLATE = app
 CONFIG += console
-CONFIG -= qt
+CONFIG += qt qtestlib
 
 SOURCES += main.cpp \
     list.cpp \
@@ -10,5 +10,6 @@ SOURCES += main.cpp \
 HEADERS += \
     list.h \
     linkedList.h \
-    sortedArrayList.h
+    sortedArrayList.h \
+    listTest.h
 

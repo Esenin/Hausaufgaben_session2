@@ -1,6 +1,7 @@
 #pragma once
 
 #include <iostream>
+
 #include "writer.h"
 
 //! This class prints some matrix elements to console

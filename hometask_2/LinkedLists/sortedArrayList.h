@@ -1,5 +1,4 @@
-#ifndef LINKEDARRAYLIST_H
-#define LINKEDARRAYLIST_H
+#pragma once
 
 #include <iostream>
 #include "list.h"
@@ -16,7 +15,7 @@ public:
     virtual void add(int newValue);
     virtual void remove(int target);
     virtual void writeAll() const;
-    virtual bool isExists(int target) const;
+    virtual bool exists(int target) const;
     virtual int& operator[](int index);
 
 protected:
@@ -29,4 +28,3 @@ private:
     int currentSize;
 };
 
-#endif // LINKEDARRAYLIST_H

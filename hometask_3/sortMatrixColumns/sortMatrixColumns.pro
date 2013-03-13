@@ -1,6 +1,6 @@
 TEMPLATE = app
-CONFIG += console
-CONFIG -= qt
+CONFIG += console qtestlib
+CONFIG += qt
 
 SOURCES += main.cpp \
     sorter.cpp \
@@ -8,5 +8,6 @@ SOURCES += main.cpp \
 
 HEADERS += \
     sorter.h \
-    quickSorter.h
+    quickSorter.h \
+    sorterTest.h
 

@@ -1,5 +1,5 @@
 TEMPLATE = app
-CONFIG += console
+CONFIG += console qtestlib
 CONFIG += qt
 
 SOURCES += main.cpp \
@@ -18,5 +18,7 @@ HEADERS += \
     formulaChecker.h \
     calcProcessor.h \
     arrayStack.h \
-    linkedStack.h
+    linkedStack.h \
+    stackTests.h \
+    calculatorTest.h
 

@@ -10,7 +10,7 @@
 class QuickSorter : public Sorter
 {
 public:
-    QuickSorter(int array[], int size);
+    QuickSorter(int *array, int const size);
     //! essential override func
     void sort();
 protected:

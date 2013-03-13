@@ -1,6 +1,7 @@
 #pragma once
 
 #include <fstream>
+
 #include "writer.h"
 
 //! Writes matrix spiral to file

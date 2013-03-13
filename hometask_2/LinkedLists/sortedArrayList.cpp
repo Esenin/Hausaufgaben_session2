@@ -117,7 +117,7 @@ void SortedArrayList::writeAll() const
 }
 
 
-bool SortedArrayList::isExists(int target) const
+bool SortedArrayList::exists(int target) const
 {
     return array[getItemIndex(target)] == target;
 }

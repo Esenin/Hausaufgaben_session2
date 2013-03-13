@@ -1,5 +1,4 @@
-#ifndef LIST_H
-#define LIST_H
+#pragma once
 
 class List
 {
@@ -9,7 +8,7 @@ public:
 
     virtual void add(int newValue) = 0;
     virtual void remove(int target) = 0;
-    virtual bool isExists(int target) const = 0;
+    virtual bool exists(int target) const = 0;
     virtual void writeAll() const = 0;
     virtual int &operator[] (int index) = 0;
 
@@ -19,4 +18,3 @@ protected:
     int elementsCount;
 };
 
-#endif // LIST_H

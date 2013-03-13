@@ -14,7 +14,7 @@ public:
     @param array your sort subject
     @param size int size of array
     */
-    Sorter(int array[], int size);
+    Sorter(int *array, int const size);
 
     //! Destructor must be virtual
     virtual ~Sorter();

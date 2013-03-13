@@ -1,5 +1,4 @@
-#ifndef FORMULATRANSLATOR_H
-#define FORMULATRANSLATOR_H
+#pragma once
 
 #include "priorityInfo.h"
 #include <QString>
@@ -18,4 +17,3 @@ private:
     void popUntilSkobe();
 };
 
-#endif // FORMULATRANSLATOR_H

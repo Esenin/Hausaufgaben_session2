@@ -1,5 +1,4 @@
-#ifndef FORMULACHECKER_H
-#define FORMULACHECKER_H
+#pragma once
 
 #include <QString>
 #include "priorityInfo.h"
@@ -19,4 +18,3 @@ private:
     bool isGoodOperatorOperandSequence(QString formula);
 };
 
-#endif // FORMULACHECKER_H

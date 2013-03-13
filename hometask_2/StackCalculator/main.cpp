@@ -1,7 +1,10 @@
 #include <iostream>
 #include <QString>
+
 #include "formulaChecker.h"
 #include "calcProcessor.h"
+#include "stackTests.h"
+#include "calculatorTest.h"
 
 using namespace std;
 
@@ -46,6 +49,12 @@ void testing()
 
 int main()
 {
+    StackTest stackTest;
+    QTest::qExec(&stackTest);
+
+    CalculatorTest calcTest;
+    QTest::qExec(&calcTest);
+
     testing();
     return 0;
 }

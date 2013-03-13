@@ -1,7 +1,7 @@
-#ifndef CALCPROCESSOR_H
-#define CALCPROCESSOR_H
+#pragma once
 
 #include <QString>
+
 #include "priorityInfo.h"
 #include "polandFormulaTranslator.h"
 #include "arrayStack.h"
@@ -23,4 +23,3 @@ private:
     float calcCurrent(float const &arg1, float const &arg2, QChar const &action);
 };
 
-#endif // CALCPROCESSOR_H

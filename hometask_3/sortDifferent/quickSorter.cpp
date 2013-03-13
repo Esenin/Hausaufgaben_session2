@@ -4,7 +4,7 @@
 using std::swap;
 using std::cout;
 
-QuickSorter::QuickSorter(int array[], int size) :
+QuickSorter::QuickSorter(int *array, int const size) :
     Sorter(array, size)
 {
 }

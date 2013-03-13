@@ -110,7 +110,7 @@ void LinkedList::remove(int target)
 }
 
 
-bool LinkedList::isExists(const int target) const
+bool LinkedList::exists(const int target) const
 {
     ListElement *temp = head;
 

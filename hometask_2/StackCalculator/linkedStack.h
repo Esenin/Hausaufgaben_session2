@@ -1,5 +1,4 @@
-#ifndef LLIST_H
-#define LLIST_H
+#pragma once
 
 #include <stdlib.h>
 #include <QString.h>
@@ -28,4 +27,3 @@ private:
     void deleteAll();
 };
 
-#endif // LLIST_H

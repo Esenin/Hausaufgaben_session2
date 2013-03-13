@@ -1,5 +1,4 @@
-#ifndef STACK_H
-#define STACK_H
+#pragma once
 
 #include <QString>
 
@@ -20,4 +19,3 @@ protected:
     int elementsCount;
 };
 
-#endif // STACK_H

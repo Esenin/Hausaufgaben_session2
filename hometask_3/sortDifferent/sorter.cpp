@@ -4,17 +4,14 @@ using std::swap;
 using std::cout;
 using std::endl;
 
-Sorter::Sorter(int array[], int size)
+Sorter::Sorter(int *array, int const size)
+    : arrSize(size)
 {
-    insideArray = new int[size];
-    for (int i = 0; i < size; i++)
-        insideArray[i] = array[i];
-    arrSize = size;
+    insideArray = array;
 }
 
 Sorter::~Sorter()
 {
-    delete[] insideArray;
     cout << "Object destroing\n";
 }
 

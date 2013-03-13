@@ -12,7 +12,7 @@
 class BubbleSorter : public Sorter
 {
 public:
-    BubbleSorter(int array[], int size);
+    BubbleSorter(int *array, int const size);
     //! essential override func
     void sort();
 protected:
