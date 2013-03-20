@@ -14,19 +14,6 @@ CalcTree::~CalcTree()
     clear();
 }
 
-int CalcTree::strSize(char const *string)
-{
-    int size = 0;
-    while (string[size] != '\0')
-        size++;
-    return size;
-}
-
-bool CalcTree::isDigit(char const &symbol)
-{
-    return (symbol >= '0' && symbol <= '9');
-}
-
 void CalcTree::clear()
 {
     if (root != NULL)
@@ -34,12 +21,12 @@ void CalcTree::clear()
     root = NULL;
 }
 
-bool CalcTree::isOperator(char const &symbol)
+bool CalcTree::isOperator(QChar const &symbol) const
 {
     return (symbol == '+' || symbol == '-' || symbol == '*' || symbol == '/');
 }
 
-void CalcTree::setNewTree(char const string[])
+void CalcTree::setNewTree(QString const string)
 {
     int const firstCharPos = 1;
     clear();
@@ -47,46 +34,45 @@ void CalcTree::setNewTree(char const string[])
 }
 
 
-int CalcTree::addNode(Node *&current, char const *string, int curPos)
+int CalcTree::addNode(Node *&current, QString const string, int curPos)
 {
-    int strLen = strSize(string);
-    bool isEditing = false;
-    char word[strMaxLen] = {};
-    int wordSize = 0;
-
+    QRegExp separators("[()+-*/ ]");
+    int strLen = string.size();
+    QString figure("");
+    figure.clear();
 
     while (curPos < strLen)
     {
-        if (isOperator(string[curPos]))
-            current = new OperatorNode(string[curPos]);
-        if (isDigit(string[curPos]))
+        if (isOperator(string.at(curPos)))
+            current = new OperatorNode(string.at(curPos));
+
+        if (string.at(curPos).isDigit())
         {
-            isEditing = true;
-            word[wordSize++] = string[curPos];
+            figure = string.mid(curPos, separators.indexIn(string, curPos + 1) - curPos);
+            curPos += figure.size();
+
+            if (current != NULL)
+                current->addChild(new OperandNode(figure));
+            else
+                current = new OperandNode(figure);
+            figure.clear();
         }
-        else
-            if (isEditing)
-            {
-                word[wordSize++] = '\0';
-                current->addChild(new OperandNode(word));
-                isEditing = false;
-                wordSize = 0;
-            }
-        if (string[curPos] == '(')
+
+        if (string.at(curPos) == '(')
         {
             Node *branch = NULL;
             curPos = addNode(branch, string, curPos + 1);
             current->addChild(branch);
         }
         else
-            if (string[curPos] == ')')
+            if (string.at(curPos) == ')')
                 return curPos;
         curPos++;
     }
     return curPos;
 }
 
-void CalcTree::printTree()
+void CalcTree::printTree() const
 {
     root->print();
     cout << endl;

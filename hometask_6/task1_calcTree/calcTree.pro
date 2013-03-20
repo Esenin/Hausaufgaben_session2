@@ -15,3 +15,6 @@ HEADERS += \
     operatorNode.h \
     operandNode.h
 
+OTHER_FILES += \
+    test.txt
+

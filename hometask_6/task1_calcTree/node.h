@@ -24,17 +24,17 @@ public:
     virtual ~Node();
 
     //! print writes subtrees, then self
-    void print();
+    void print() const;
     //! just calculates both of subtrees and then self
-    virtual qreal calculateTree() = 0;
+    virtual qreal calculateTree() const = 0;
 
     //! solution for encapsulation problem.
     void addChild(Node *child);
 protected:
-    virtual void writeSelf() = 0;
+    virtual void writeSelf() const = 0;
 
     //! simple calculator
-    qreal calculate(qreal const &first, qreal const &second, int const &action);
+    qreal calculate(qreal const &first, qreal const &second, int const &action) const;
 
     Node *leftChild;
     Node *rightChild;

@@ -1,5 +1,7 @@
 #pragma once
 
+#include <QtCore/QString>
+
 #include "node.h"
 
 namespace treeNodes
@@ -8,14 +10,14 @@ namespace treeNodes
 class OperatorNode : public Node
 {
 public:
-    OperatorNode(char const &symbol);
+    OperatorNode(QChar const &symbol);
 
-    qreal calculateTree();
+    qreal calculateTree() const;
 
 protected:
-    void writeSelf();
-    char operatorToChar(int const &action);
-    operators::Operators getOperator(char const &symbol);
+    void writeSelf() const;
+    char operatorToChar(int const &action) const;
+    operators::Operators getOperator(QChar const &symbol) const;
 };
 
 }

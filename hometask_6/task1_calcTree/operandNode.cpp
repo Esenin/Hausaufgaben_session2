@@ -2,23 +2,17 @@
 
 using namespace treeNodes;
 
-OperandNode::OperandNode(char const *figure)
+OperandNode::OperandNode(QString const &figure)
 {
-    value = 0;
-    int index = 0;
-    while (figure[index] != '\0')
-    {
-        value += value * 10 + (figure[index] - '0') ;
-        index++;
-    }
+    value = figure.toInt();
 }
 
-void OperandNode::writeSelf()
+void OperandNode::writeSelf() const
 {
     std::cout << value << " ";
 }
 
-qreal OperandNode::calculateTree()
+qreal OperandNode::calculateTree() const
 {
     return value;
 }

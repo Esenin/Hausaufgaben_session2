@@ -51,6 +51,12 @@ private slots:
         QVERIFY(qAbs(mainTree->calculateTree() - (-6)) < zero);
     }
 
+    void strangeTest()
+    {
+        mainTree->setNewTree("(+ 1 (20))");
+        QVERIFY(qAbs(mainTree->calculateTree() - (21)) < zero);
+    }
+
     void cleanupTestCase()
     {
         delete mainTree;
@@ -59,5 +65,4 @@ private slots:
 private:
     CalcTree *mainTree;
     qreal zero;
-
 };

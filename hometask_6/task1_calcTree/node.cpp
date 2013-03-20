@@ -20,7 +20,7 @@ Node::~Node()
         delete rightChild;
 }
 
-void Node::print()
+void Node::print() const
 {
     if (leftChild != NULL)
     {
@@ -45,7 +45,7 @@ void Node::addChild(Node *child)
     }
 }
 
-qreal Node::calculate(qreal const &first, qreal const &second, int const &action)
+qreal Node::calculate(qreal const &first, qreal const &second, int const &action) const
 {
     double const zero = 1e-15;
     switch (action)
