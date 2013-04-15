@@ -13,7 +13,7 @@ private slots:
     void initTestCase()
     {
         tree = NULL;
-        tree = new RBTree;
+        tree = new RBTree<int>;
         QVERIFY(tree);
     }
 
@@ -69,5 +69,5 @@ private slots:
     }
 
 private:
-    RBTree *tree;
+    RBTree<int> *tree;
 };

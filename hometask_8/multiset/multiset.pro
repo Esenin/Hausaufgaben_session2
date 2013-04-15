@@ -2,8 +2,7 @@ TEMPLATE = app
 CONFIG += console
 CONFIG += qt qtestlib
 
-SOURCES += main.cpp \
-    rBTree.cpp
+SOURCES += main.cpp
 
 HEADERS += \
     rBTree.h \
