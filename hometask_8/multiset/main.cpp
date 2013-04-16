@@ -2,6 +2,7 @@
 
 #include "testRBTree.h"
 #include "testRBTreeIterator.h"
+#include "testBag.h"
 
 int main()
 {
@@ -10,6 +11,9 @@ int main()
 
     RBTreeIteratorTest iteratorTest;
     QTest::qExec(&iteratorTest);
+
+    BagTest multiSetTest;
+    QTest::qExec(&multiSetTest);
 
     return 0;
 }

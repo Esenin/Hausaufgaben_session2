@@ -19,7 +19,7 @@ private slots:
 
     void singleAdditionTest()
     {
-        QCOMPARE(tree->exists(42), false);
+        QVERIFY(!tree->exists(42));
         tree->add(42);
         QVERIFY(tree->exists(42));
     }

@@ -7,5 +7,7 @@ SOURCES += main.cpp
 HEADERS += \
     rBTree.h \
     testRBTree.h \
-    testRBTreeIterator.h
+    testRBTreeIterator.h \
+    myMultiSet.h \
+    testBag.h
 

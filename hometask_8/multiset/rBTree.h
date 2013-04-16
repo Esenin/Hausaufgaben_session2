@@ -3,7 +3,6 @@
 #include <stdlib.h>
 #include <QtCore/QList>
 #include <QtCore/QPair>
-#include <QtCore/QDebug>
 
 template <typename Type>
 //! @class RBTree is container based on RedBlack balanced Tree
@@ -17,11 +16,18 @@ public:
     RBTree();
     ~RBTree();
 
-    void add(const Type &value);
+    class TreeExceptions{};
+    class NoSuchKey :  public TreeExceptions{};
+
+    //! add new node or make counter increment
+    void add(const Type &value, const int count = 1);
     void removeOne(const Type &value);
     void removeAllAs(const Type &value);
-    bool exists(const Type value) const;
+    //! returns count of such elements
+    int exists(const Type value) const;
+    bool isEmpty() const;
 
+    //! @class ConstIterator const forward iterator of Rb-tree, circled
     class ConstIterator;
 
 protected:
@@ -36,14 +42,13 @@ protected:
     bool hasOneChild(const Node *current) const;
     void rotateRight(Node *current);
     void rotateLeft(Node *current);
-    void transformToLeaf(Node *&current);
     QPair<Type, int>  popMostLeftChild(Node *&current);
 
     //! show parent their new children
     void parentNotification(Node *oldNode, Node *newNode);
     void rotatePathCorrection(Node *oldNode, Node *newNode);
 
-    void addTo(Node *&current, const Type &newValue);
+    void addTo(Node *&current, const Type &newValue, const int count = 1);
     //! recoursive downhill correction, insert_case 1: new node is root
     void isRootCorrection();
     void parentValidation();
@@ -88,16 +93,33 @@ struct RBTree<Type>::Node
         rightChild = NULL;
     }
 
-    void operator= (const Type &newValue)
+    void transformToNode(const QPair<Type, int> &data)
     {
         isRed = true;
-        value = newValue;
-        count = 1;
+        value = data.first;
+        count = data.second;
         if (!leftChild)
             leftChild = new Node();
         if (!rightChild)
             rightChild = new Node();
     }
+
+    void transformToLeaf()
+    {
+        if (leftChild)
+        {
+            delete leftChild;
+            leftChild = NULL;
+        }
+        if (rightChild)
+        {
+            delete rightChild;
+            rightChild = NULL;
+        }
+        count = 0;
+        isRed = false;
+    }
+
     void operator= (const QPair<Type, int> &newData)
     {
         value = newData.first;
@@ -106,13 +128,21 @@ struct RBTree<Type>::Node
 };
 
 template <typename Type>
-//! @class ConstIterator const forward iterator of Rb-tree
 class RBTree<Type>::ConstIterator
 {
 public:
-    explicit ConstIterator(RBTree<Type> *tree)
+    explicit ConstIterator(const RBTree<Type> &tree)
+        : mTree(&tree),
+          counter(0),
+          fullCircleDone(false)
+    {
+        resetToFirst();
+    }
+
+    explicit ConstIterator(const RBTree<Type> *tree)
         : mTree(tree),
-          counter(0)
+          counter(0),
+          fullCircleDone(false)
     {
         resetToFirst();
     }
@@ -138,7 +168,12 @@ public:
     //! go to the next block
     void operator ++(int)
     {
-        if (!curPoint || end())
+        if (last())
+            fullCircleDone = true;
+        else
+            fullCircleDone = false;
+
+        if (!curPoint || last())
         {
             resetToFirst();
             if (!begin())
@@ -149,6 +184,11 @@ public:
     }
 
     bool end() const
+    {
+        return fullCircleDone;
+    }
+
+    bool last() const
     {
         return counter >= mTree->nodesCount;
     }
@@ -204,10 +244,11 @@ protected:
     }
 
 private:
-    RBTree<Type> *mTree;
+    const RBTree<Type> *mTree;
     RBTree<Type>::Node *curPoint;
     QList<RBTree<Type>::Node *> path;
     int counter;
+    bool fullCircleDone;
 };
 
 template <typename Type>
@@ -226,10 +267,10 @@ RBTree<Type>::~RBTree()
 }
 
 template <typename Type>
-void RBTree<Type>::add(const Type &value)
+void RBTree<Type>::add(const Type &value, const int count)
 {
     curPath.clear();
-    addTo(root, value);
+    addTo(root, value, count);
 }
 
 template <typename Type>
@@ -318,13 +359,13 @@ bool RBTree<Type>::hasOneChild(const RBTree::Node *current) const
 }
 
 template <typename Type>
-void RBTree<Type>::addTo(Node *&current, const Type &newValue)
+void RBTree<Type>::addTo(Node *&current, const Type &newValue, const int count)
 {
     curPath.append(current);
 
     if (isLeaf(current))
     {
-        (*current) = newValue;
+        current->transformToNode(QPair<Type, int> (newValue, count));
         nodesCount++;
         isRootCorrection();
         return;
@@ -332,14 +373,14 @@ void RBTree<Type>::addTo(Node *&current, const Type &newValue)
     else
         if (current->value == newValue)
         {
-            current->count++;
+            current->count += count;
             return;
         }
 
     if (newValue < current->value)
-        addTo(current->leftChild, newValue);
+        addTo(current->leftChild, newValue, count);
     if (newValue > current->value)
-        addTo(current->rightChild, newValue);
+        addTo(current->rightChild, newValue, count);
 }
 
 template <typename Type>
@@ -362,24 +403,6 @@ void RBTree<Type>::rotateLeft(RBTree::Node *current)
 
     current->rightChild = newHead->leftChild;
     newHead->leftChild = current;
-}
-
-template <typename Type>
-void RBTree<Type>::transformToLeaf(RBTree::Node *&current)
-{
-    if (current->leftChild)
-    {
-        delete current->leftChild;
-        current->leftChild = NULL;
-    }
-    if (current->rightChild)
-    {
-        delete current->rightChild;
-        current->rightChild = NULL;
-    }
-    current->count = 0;
-    current->value = 0;
-    current->isRed = false;
 }
 
 template <typename Type>
@@ -491,8 +514,8 @@ void RBTree<Type>::topRotation()
 template <typename Type>
 void RBTree<Type>::remove(Node *&current, const Type &value)
 {
-    if (current == NULL)
-        throw;
+    if (isLeaf(current))
+        throw NoSuchKey();
 
     curPath.append(current);
 
@@ -519,10 +542,7 @@ void RBTree<Type>::remove(Node *&current, const Type &value)
     else
     {
         if (isLeaf(current->rightChild))
-        {
-            transformToLeaf(current);
-
-        }
+            current->transformToLeaf();
         else
             (*current) = popMostLeftChild(current->rightChild);
     }
@@ -641,19 +661,25 @@ void RBTree<Type>::redBrothersChildRotation()
 }
 
 template <typename Type>
-bool RBTree<Type>::exists(const Type value) const
+int RBTree<Type>::exists(const Type value) const
 {
     Node *temp = root;
     while (temp != NULL)
     {
         if (temp->value == value)
-            return true;
+            return temp->count;
         if (value < temp->value)
             temp = temp->leftChild;
         else
             temp = temp->rightChild;
     }
-    return false;
+    return 0;
+}
+
+template <typename Type>
+bool RBTree<Type>::isEmpty() const
+{
+    return (!nodesCount);
 }
 
 template <typename Type>
