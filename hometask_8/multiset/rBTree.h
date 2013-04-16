@@ -22,6 +22,8 @@ public:
     void removeAllAs(const Type &value);
     bool exists(const Type value) const;
 
+    class ConstIterator;
+
 protected:
     struct Node;
     Node *current() const;
@@ -63,6 +65,7 @@ private:
     QList<Node *> curPath;
     Node *root;
     bool totalRemove;
+    int nodesCount;
 };
 
 
@@ -103,8 +106,114 @@ struct RBTree<Type>::Node
 };
 
 template <typename Type>
+//! @class ConstIterator const forward iterator of Rb-tree
+class RBTree<Type>::ConstIterator
+{
+public:
+    explicit ConstIterator(RBTree<Type> *tree)
+        : mTree(tree),
+          counter(0)
+    {
+        resetToFirst();
+    }
+
+    ~ConstIterator()
+    {
+        path.clear();
+    }
+
+    //! returns pair "Type - count" of current Node
+    QPair<Type, int> current()
+    {
+        if (!curPoint)
+        {
+            resetToFirst();
+            if (!counter)
+                throw;
+        }
+
+        return QPair<Type, int> (curPoint->value, curPoint->count);
+    }
+
+    //! go to the next block
+    void operator ++(int)
+    {
+        if (!curPoint || end())
+        {
+            resetToFirst();
+            if (!begin())
+                throw;
+        }
+        else
+            goNext(curPoint->value);
+    }
+
+    bool end() const
+    {
+        return counter >= mTree->nodesCount;
+    }
+
+    bool begin() const
+    {
+        const int first = 1;
+        return counter == first;
+    }
+
+    void resetToFirst()
+    {
+        path.clear();
+        path.append(mTree->root);
+        curPoint = path.last();
+        counter = (mTree->isLeaf(curPoint))? 0 : 1;
+
+        if (counter)
+            switchToMostLeft();
+    }
+
+protected:
+    void switchToMostLeft()
+    {
+        while (!mTree->isLeaf(curPoint->leftChild))
+        {
+            curPoint = curPoint->leftChild;
+            path.append(curPoint);
+        }
+    }
+
+    void goNext(const Type &curValue)
+    {
+        if (curPoint->value > curValue)
+        {
+            counter++;
+            return;
+        }
+
+        if (!mTree->isLeaf(curPoint->rightChild) && curPoint->rightChild->value > curValue)
+        {
+            curPoint = curPoint->rightChild;
+            path.append(curPoint);
+            switchToMostLeft();
+            goNext(curValue);
+        }
+        else
+        {
+            path.removeLast();
+            curPoint = path.last();
+            goNext(curValue);
+        }
+    }
+
+private:
+    RBTree<Type> *mTree;
+    RBTree<Type>::Node *curPoint;
+    QList<RBTree<Type>::Node *> path;
+    int counter;
+};
+
+template <typename Type>
 RBTree<Type>::RBTree()
-    : totalRemove(false)
+    : totalRemove(false),
+      nodesCount(0)
 {
     curPath.clear();
     root = new Node(); // Null-leaf;
@@ -216,6 +325,7 @@ void RBTree<Type>::addTo(Node *&current, const Type &newValue)
     if (isLeaf(current))
     {
         (*current) = newValue;
+        nodesCount++;
         isRootCorrection();
         return;
     }
@@ -446,6 +556,7 @@ void RBTree<Type>::deleteSingleChild()
 
     delete ((badNode->leftChild == child)? badNode->rightChild : badNode->leftChild);
     delete badNode;
+    nodesCount--;
 }
 
 template <typename Type>

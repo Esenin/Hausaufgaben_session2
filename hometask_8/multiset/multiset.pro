@@ -6,5 +6,6 @@ SOURCES += main.cpp
 
 HEADERS += \
     rBTree.h \
-    testRBTree.h
+    testRBTree.h \
+    testRBTreeIterator.h
 
