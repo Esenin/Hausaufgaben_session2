@@ -12,9 +12,13 @@ class RBTreeIteratorTest : public QObject
 protected:
     void loadTree()
     {
-        for (int i = 1; i < 143; i += 2)
+        for (int i = 1; i < size; i += 2)
             tree->add(i);
     }
+
+private:
+    RBTree<int> *tree;
+    static const int size = 143;
 
 private slots:
     void initTestCase()
@@ -25,29 +29,40 @@ private slots:
 
     void iteratorSimpleTest()
     {
-        RBTree<int>::ConstIterator iterator(tree);
-
-        for (int i = 1; i < 143; i += 2)
-        {
-            QCOMPARE(iterator.current().first, i);
-            iterator++;
-        }
+        RBTree<int>::ForwardIterator iterator(tree);
+        for (int i = 1; i < size; i += 2)
+            QCOMPARE(iterator.next().first, i);
     }
 
-    void iteratorComplexTest()
+    void iteratorAddingTest()
     {
-        RBTree<int>::ConstIterator iterator(tree);
+        RBTree<int>::ForwardIterator iterator(tree);
+        for (int i = 1; i < size; i++)
+            iterator.add(i);
 
-        for (int i = 1; i < 143; i++)
+        int model = 0;
+        while (iterator.hasNext())
         {
-            tree->add(i);
+            QCOMPARE(iterator.next().first, ++model);
+            QCOMPARE(iterator.current().second, (model % 2) + 1);
         }
 
-        for (int i = 1; i < 143; i++)
+        QVERIFY(model <= size);
+    }
+
+    void removingTest()
+    {
+        RBTree<int>::ForwardIterator iterator(tree);
+        while(iterator.hasNext())
         {
-            QCOMPARE(iterator.current().first, i);
-            QCOMPARE(iterator.current().second, (i % 2) + 1);
-            iterator++;
+            iterator.next();
+            iterator.removeOne();
+        }
+
+        RBTree<int>::ForwardIterator postIterator(tree);
+        while(postIterator.hasNext())
+        {
+            QVERIFY(postIterator.next().first % 2);
         }
     }
 
@@ -56,6 +71,5 @@ private slots:
         delete tree;
     }
 
-private:
-    RBTree<int> *tree;
+
 };

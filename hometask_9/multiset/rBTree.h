@@ -20,15 +20,15 @@ public:
     class NoSuchKey :  public TreeExceptions{};
 
     //! add new node or make counter increment
-    void add(const Type &value, const int count = 1);
+    void add(const Type &value, const int &count = 1);
     void removeOne(const Type &value);
     void removeAllAs(const Type &value);
     //! returns count of such elements
     int exists(const Type value) const;
     bool isEmpty() const;
 
-    //! @class ConstIterator const forward iterator of Rb-tree, circled
-    class ConstIterator;
+    //! @class ConstIterator forward iterator of Rb-tree, looped
+    class ForwardIterator;
 
 protected:
     struct Node;
@@ -127,86 +127,115 @@ struct RBTree<Type>::Node
 };
 
 template <typename Type>
-class RBTree<Type>::ConstIterator
+class RBTree<Type>::ForwardIterator
 {
 public:
-    explicit ConstIterator(const RBTree<Type> &tree)
-        : mTree(&tree),
-          counter(0),
-          fullCircleDone(false)
+    //! @class EmptyTree exception
+    class EmptyTree{};
+
+    explicit ForwardIterator(RBTree<Type> &tree)
+        : ForwardIterator(&tree)
     {
-        resetToFirst();
     }
 
-    explicit ConstIterator(const RBTree<Type> *tree)
+    explicit ForwardIterator(RBTree<Type> *tree)
         : mTree(tree),
           counter(0),
-          fullCircleDone(false)
+          prevValue(0)
     {
         resetToFirst();
     }
 
-    ~ConstIterator()
+    ~ForwardIterator()
     {
         path.clear();
     }
 
     //! returns pair "Type - count" of current Node
-    QPair<Type, int> current()
+    QPair<Type, int> current() throw (EmptyTree)
     {
-        if (!curPoint)
+        if (counter == emptyTree)
         {
             resetToFirst();
-            if (!counter)
-                throw;
+            if (counter == emptyTree)
+                throw EmptyTree();
         }
+
+        if (counter == startPosition)
+            return next();
 
         return QPair<Type, int> (curPoint->value, curPoint->count);
     }
 
-    //! go to the next block
-    void operator ++(int)
+    //! shifts iterator to next element then gives it
+    QPair<Type, int> next()
     {
-        if (last())
-            fullCircleDone = true;
-        else
-            fullCircleDone = false;
+        if (counter == startPosition)
+        {
+            counter++;
+            return current();
+        }
 
-        if (!curPoint || last())
+        this->operator ++(0);
+
+        return current();
+    }
+
+    //! use this method before next() to provide safety
+    bool hasNext() const
+    {
+        return (counter != emptyTree) && (curPoint->value < lastValue);
+    }
+
+    //! go to the next block, go to begin case end of container
+    void operator ++(int) throw (EmptyTree)
+    {
+        if (!curPoint || !hasNext())
         {
             resetToFirst();
-            if (!begin())
-                throw;
+            if (counter == emptyTree)
+                throw EmptyTree();
         }
         else
+        {
+            prevValue = curPoint->value;
             goNext(curPoint->value);
+        }
     }
 
-    bool end() const
+    void add(const Type &item)
     {
-        return fullCircleDone;
+        const Type value = curPoint->value;
+        mTree->add(item);
+        correctPath(value);
     }
 
-    bool last() const
+    void removeOne()
     {
-        return counter >= mTree->nodesCount;
-    }
-
-    bool begin() const
-    {
-        const int first = 1;
-        return counter == first;
+        const int oldCount = mTree->nodesCount;
+        mTree->removeOne(curPoint->value);
+        if (counter == startPosition + 1)
+        {
+            resetToFirst();
+            return;
+        }
+        correctPath(prevValue);
+        if (mTree->nodesCount < oldCount)
+            lastValue = findMax();
     }
 
     void resetToFirst()
     {
         path.clear();
         path.append(mTree->root);
-        curPoint = path.last();
-        counter = (mTree->isLeaf(curPoint))? 0 : 1;
+        curPoint = mTree->root;
+        counter = (mTree->isLeaf(curPoint))? emptyTree : startPosition;
 
-        if (counter)
+        if (counter == startPosition)
+        {
             switchToMostLeft();
+            lastValue = findMax();
+        }
     }
 
 protected:
@@ -215,6 +244,28 @@ protected:
         while (!mTree->isLeaf(curPoint->leftChild))
         {
             curPoint = curPoint->leftChild;
+            path.append(curPoint);
+        }
+    }
+
+    Type findMax()
+    {
+        RBTree<Type>::Node *temp = mTree->root;
+        while (!mTree->isLeaf(temp->rightChild))
+        {
+            temp = temp->rightChild;
+        }
+        return temp->value;
+    }
+
+    void correctPath(const Type &lastValue)
+    {
+        path.clear();
+        curPoint = mTree->root;
+        path.append(curPoint);
+        while (curPoint->value != lastValue)
+        {
+            curPoint = (curPoint->value > lastValue)?   curPoint->leftChild : curPoint->rightChild;
             path.append(curPoint);
         }
     }
@@ -243,12 +294,20 @@ protected:
     }
 
 private:
-    const RBTree<Type> *mTree;
+    RBTree<Type> *mTree;
     RBTree<Type>::Node *curPoint;
     QList<RBTree<Type>::Node *> path;
     int counter;
-    bool fullCircleDone;
+    Type lastValue;
+    int prevValue;
+    static const int startPosition;
+    static const int emptyTree;
 };
+
+template <typename Type>
+const int RBTree<Type>::ForwardIterator::startPosition = 0;
+template <typename Type>
+const int RBTree<Type>::ForwardIterator::emptyTree = -1;
 
 template <typename Type>
 RBTree<Type>::RBTree()
@@ -266,7 +325,7 @@ RBTree<Type>::~RBTree()
 }
 
 template <typename Type>
-void RBTree<Type>::add(const Type &value, const int count)
+void RBTree<Type>::add(const Type &value, const int &count)
 {
     curPath.clear();
     addTo(root, value, count);

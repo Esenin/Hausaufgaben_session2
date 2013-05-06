@@ -25,34 +25,54 @@ private slots:
 
     void iteratorSimpleTest()
     {
-        int compare = 1;
-        for (MyMultiSet<int>::ConstForwardIterator iterator(mSet); !iterator.end(); iterator++)
+        int compareModel = 1;
+
+        MyMultiSet<int>::ForwardIterator iterator(mSet);
+        while (iterator.hasNext())
         {
-            QCOMPARE(iterator.current(), compare);
-            compare += 2;
+            QCOMPARE(iterator.next(), compareModel);
+            compareModel += 2;
         }
-        QVERIFY(compare >= bound);
+
+        QVERIFY(compareModel >= bound);
     }
 
-    void iteratorComplexTest()
+    void iteratorAddingTest()
     {
+        MyMultiSet<int>::ForwardIterator iterator(mSet);
         for (int i = 1; i < 143; i++)
+            iterator.add(i);
+
+        iterator.resetToFirst();
+        int compareModel = 1;
+        while(iterator.hasNext())
         {
-            mSet->add(i);
+            QCOMPARE(iterator.next(), compareModel);
+            if (compareModel % 2)
+                QCOMPARE(iterator.next(), compareModel);
+            compareModel++;
         }
+    }
 
-        MyMultiSet<int>::ConstForwardIterator iterator(mSet);
-
-        for (int i = 1; i < 143; i++)
+    void iteratorRemovingTest()
+    {
+        MyMultiSet<int>::ForwardIterator iterator(mSet);
+        while (iterator.hasNext())
         {
-            QCOMPARE(iterator.current(), i);
-            if (i % 2)
+            if (iterator.next() % 2)
             {
-                iterator++;
-                QCOMPARE(iterator.current(), i);
+                iterator.removeItem();
             }
-            iterator++;
         }
+
+        iterator.resetToFirst();
+        int compareModel = 2;
+        while(iterator.hasNext())
+        {
+            QCOMPARE(iterator.next(), compareModel);
+            compareModel += 2;
+        }
+
     }
 
     void cleanupTestCase()

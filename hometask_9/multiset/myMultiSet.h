@@ -7,7 +7,9 @@ template<typename Type>
 class MyMultiSet
 {
 public:
-    class ConstForwardIterator;
+    //! @class ForwardIterator java-styled forward iterator
+    class ForwardIterator;
+
     class SetExceptions{};
     class EmptySetError : public SetExceptions{};
 
@@ -22,6 +24,7 @@ public:
     }
 
     void add(const Type &element, const int count = 1);
+    void add(const QPair<Type, int> &item);
 
     void removeOne(const Type &element);
     void removeAllAs(const Type &element);
@@ -42,14 +45,15 @@ private:
 };
 
 // Implementation
-//! @class ConstForwardIterator cycled forward iterator with expanding same elements to sequence
+//! @class ConstForwardIterator looped forward iterator with expanding same elements to sequence
 template<typename Type>
-class MyMultiSet<Type>::ConstForwardIterator
+class MyMultiSet<Type>::ForwardIterator
 {
 public:
-    ConstForwardIterator(const MyMultiSet<Type> *set)
+    ForwardIterator(MyMultiSet<Type> *set)
         : iterator(set->tree),
-          elementsCount(iterator.current().second)
+          elementsCount(iterator.current().second),
+          zeroPosition(true)
     {
     }
 
@@ -58,30 +62,59 @@ public:
         return iterator.current().first;
     }
 
+    Type next()
+    {
+        this->operator ++(empty);
+        elementsCount--;
+        return current();
+    }
+
+    void add(const Type &item)
+    {
+        iterator.add(item);
+        if (item == current())
+            elementsCount++;
+    }
+
+    //! removes current element
+    void removeItem()
+    {
+        iterator.removeOne();
+        elementsCount--;
+    }
+
+    bool hasNext()
+    {
+        return (iterator.hasNext() || elementsCount > empty);
+    }
+
+    void resetToFirst()
+    {
+        iterator.resetToFirst();
+    }
+
+protected:
     void operator ++(int)
     {
-        elementsCount--;
+        if (zeroPosition)
+        {
+            zeroPosition = false;
+            return;
+        }
 
-        if (!elementsCount)
+
+        if (elementsCount <= empty)
         {
             iterator++;
             elementsCount = iterator.current().second;
         }
     }
 
-    bool begin() const
-    {
-        return iterator.begin();
-    }
-
-    bool end() const
-    {
-        return iterator.end();
-    }
-
-    private:
-        typename RBTree<Type>::ConstIterator iterator;
-        int elementsCount;
+private:
+    static const int empty = 0;
+    typename RBTree<Type>::ForwardIterator iterator;
+    int elementsCount;
+    bool zeroPosition;
 };
 
 
@@ -89,6 +122,12 @@ template<typename Type>
 void MyMultiSet<Type>::add(const Type &element, const int count)
 {
     tree->add(element, count);
+}
+
+template<typename Type>
+void MyMultiSet<Type>::add(const QPair<Type, int> &item)
+{
+    tree->add(item.first, item.second);
 }
 
 template<typename Type>
@@ -136,9 +175,10 @@ MyMultiSet<Type> *MyMultiSet<Type>::intersectWith(const MyMultiSet &other)
 
     try
     {
-        for (typename RBTree<Type>::ConstIterator iterator(tree); !iterator.end(); iterator++)
+        typename RBTree<Type>::ForwardIterator iterator(tree);
+        while (iterator.hasNext())
         {
-            int elementsCountInOther = other.contains(iterator.current().first);
+            int elementsCountInOther = other.contains(iterator.next().first);
             if (elementsCountInOther)
                 commonSet->add(iterator.current().first, qMin(iterator.current().second, elementsCountInOther));
         }
@@ -159,11 +199,13 @@ MyMultiSet<Type> *MyMultiSet<Type>::sumWith(const MyMultiSet &other)
 
     try
     {
-        for (typename RBTree<Type>::ConstIterator iterator(tree); !iterator.end(); iterator++)
-            summarySet->add(iterator.current().first, iterator.current().second);
+        typename RBTree<Type>::ForwardIterator iterator(tree);
+        while (iterator.hasNext())
+            summarySet->add(iterator.next());
 
-        for (typename RBTree<Type>::ConstIterator iterator(other.tree); !iterator.end(); iterator++)
-            summarySet->add(iterator.current().first, iterator.current().second );
+        typename RBTree<Type>::ForwardIterator otherIterator(other.tree);
+        while (otherIterator.hasNext())
+            summarySet->add(otherIterator.next());
     }
     catch (...)
     {
